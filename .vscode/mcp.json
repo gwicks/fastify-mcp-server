@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "fastify-mcp-streamable-http": {
+      "type": "http",
+      "url": "http://localhost:9080/mcp",
+      "headers": {}
+    }
+  }
+}
