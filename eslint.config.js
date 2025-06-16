@@ -1,23 +1,24 @@
-import neo, { resolveIgnoresFromGitignore } from 'neostandard';
+import neo, { resolveIgnoresFromGitignore, plugins } from 'neostandard';
 
 export default [
   ...neo({
     ts: true,
     semi: true,
-    ignores: resolveIgnoresFromGitignore(),
+    ignores: resolveIgnoresFromGitignore()
   }),
+  ...plugins['typescript-eslint'].configs.recommended,
   {
     rules: {
-      'no-console': "warn",
+      'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
           vars: 'all',
           args: 'after-used',
           ignoreRestSiblings: true,
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_"
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_'
         }
       ],
       'import-x/order': [
