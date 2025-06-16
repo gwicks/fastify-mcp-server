@@ -36,6 +36,7 @@
     "test:lcov": "c8 --100 --reporter=lcov node --no-warnings --test test/**/*.test.ts",
     "lint": "eslint",
     "lint:fix": "npm run lint -- --fix",
+    "inspector": "npx @modelcontextprotocol/inspector",
     "release": "standard-version",
     "patch": "npm run release -- --release-as patch",
     "minor": "npm run release -- --release-as minor",
