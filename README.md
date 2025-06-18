@@ -63,6 +63,7 @@ The Model Context Protocol (MCP) is an open standard that enables AI assistants 
 - ✅ **Streamable HTTP Transport**: Full support for MCP's streamable HTTP protocol
 - ✅ **Session Management**: Automatic session creation, tracking, and cleanup
 - ✅ **Request Routing**: Intelligent routing for different MCP request types
+- ✅ **Authentication**: Optional Bearer token support for secure access
 - ✅ **Error Handling**: Comprehensive error handling with proper MCP error responses
 
 ### Advanced Features
@@ -131,6 +132,11 @@ await app.listen({ host: '127.0.0.1', port: 3000 });
 type FastifyMcpServerOptions = {
   server: Server;      // MCP Server instance from @modelcontextprotocol/sdk
   endpoint?: string;   // Custom endpoint path (default: '/mcp')
+  bearerMiddleware?: {
+    verifier: OAuthTokenVerifier; // Custom verifier for Bearer tokens
+    requiredScopes?: string[]; // Optional scopes required for access
+    resourceMetadataUrl?: string; // Optional URL for resource metadata
+  };
 }
 ```
 
@@ -259,7 +265,11 @@ You can secure your MCP endpoints using Bearer token authentication. The plugin 
 
 ### Enabling Bearer Token Authentication
 
-Pass the `bearerMiddleware` option when registering the plugin:
+Pass the `bearerMiddleware` option when registering the plugin. It accepts `BearerAuthMiddlewareOptions` from the SDK:
+
+```typescript
+import type { BearerAuthMiddlewareOptions } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
+```
 
 ```typescript
 import { addBearerPreHandlerHook } from 'fastify-mcp-server';
@@ -274,13 +284,13 @@ await app.register(FastifyMcpServer, {
 });
 ```
 
-- **verifier**: An object with a `verifyAccessToken(token)` method that returns the decoded token info or throws on failure.
+- **verifier**: An object with a `verifyAccessToken(token)` method that returns the decoded token info or throws on failure. It must implements the `OAuthTokenVerifier` interface from the SDK.
 - **requiredScopes**: (Optional) Array of scopes required for access.
 - **resourceMetadataUrl**: (Optional) URL included in the `WWW-Authenticate` header for 401 responses.
 
 ### How It Works
 
-The plugin uses a Fastify `preHandler` hook (see `addBearerPreHandlerHook`) to:
+The plugin uses a Fastify `preHandler` hook applied in the context of the MCP registered routes (see `addBearerPreHandlerHook`) to:
 
 - Extract the Bearer token from the `Authorization` header (`Authorization: Bearer TOKEN`).
 - Validate the token using your verifier.
