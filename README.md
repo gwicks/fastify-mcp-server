@@ -34,6 +34,7 @@ A robust Fastify plugin that provides seamless integration with the Model Contex
   - [Authentication: Bearer Token Support](#authentication-bearer-token-support)
     - [Enabling Bearer Token Authentication](#enabling-bearer-token-authentication)
     - [How It Works](#how-it-works)
+      - [Example Tool with authentication information](#example-tool-with-authentication-information)
       - [Example Error Response](#example-error-response)
   - [Development](#development)
     - [Setup](#setup)
@@ -297,6 +298,24 @@ The plugin uses a Fastify `preHandler` hook applied in the context of the MCP re
 - Check for required scopes and token expiration.
 - Attach the decoded auth info to the request object (`req.raw.auth`).
 - Respond with proper OAuth2 error codes and `WWW-Authenticate` headers on failure.
+
+#### Example Tool with authentication information
+
+You can access the validated authentication information in your MCP tools via the `authInfo` parameter:
+
+```typescript
+mcp.tool('example-auth-tool', 'Demo to display the validated access token in authInfo object', ({ authInfo }) => {
+  return {
+    content: [
+      {
+        type: 'text',
+        // Just a bad example, do not expose sensitive information in your LLM responses! :-)
+        text: `Authenticated with token: ${authInfo.token}, scopes: ${authInfo.scopes.join(', ')}, expires at: ${new Date(authInfo.expiresAt).toISOString()}`
+      }
+    ]
+  };
+});
+```
 
 #### Example Error Response
 
