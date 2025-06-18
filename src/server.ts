@@ -1,12 +1,13 @@
-import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { FastifyInstance } from 'fastify';
 
+import { addBearerPreHandlerHook } from './bearer.ts';
 import {
   DeleteRequestHandler,
   GetRequestHandler,
   type McpHandlers,
   PostRequestHandler
 } from './handlers.ts';
+import type { FastifyMcpServerOptions } from './index.ts';
 import { SessionManager } from './session-manager.ts';
 
 const MCP_DEFAULT_ENDPOINT = '/mcp';
@@ -15,28 +16,26 @@ const MCP_DEFAULT_ENDPOINT = '/mcp';
  * Main server class that coordinates MCP streamable HTTP handling
  */
 export class FastifyMcpServer {
-  private app: FastifyInstance;
-  private server: Server;
-  private endpoint: string;
+  private fastify: FastifyInstance;
+  private options: FastifyMcpServerOptions;
   private handlers: McpHandlers;
-  private _sessionManager: SessionManager;
+  private sessionManager: SessionManager;
 
-  constructor (app: FastifyInstance, server: Server, endpoint = MCP_DEFAULT_ENDPOINT) {
-    this.app = app;
-    this.endpoint = endpoint;
-    this.server = server;
+  constructor (app: FastifyInstance, options: FastifyMcpServerOptions) {
+    this.fastify = app;
+    this.options = options;
 
     // Initialize session manager
-    this._sessionManager = new SessionManager(server);
+    this.sessionManager = new SessionManager(options.server);
 
     // Initialize request handlers using Strategy pattern
     this.handlers = {
-      post: new PostRequestHandler(this._sessionManager),
-      get: new GetRequestHandler(this._sessionManager),
-      delete: new DeleteRequestHandler(this._sessionManager)
+      post: new PostRequestHandler(this.sessionManager),
+      get: new GetRequestHandler(this.sessionManager),
+      delete: new DeleteRequestHandler(this.sessionManager)
     };
 
-    this.registerRoutes();
+    this.registerMcpRoutes();
   }
 
   /**
@@ -44,7 +43,7 @@ export class FastifyMcpServer {
    */
   public getStats () {
     return {
-      activeSessions: this._sessionManager.getSessionCount(),
+      activeSessions: this.sessionManager.getSessionCount(),
       endpoint: this.endpoint
     };
   }
@@ -52,44 +51,54 @@ export class FastifyMcpServer {
   /**
    * Get the session manager instance for event listening
    */
-  public get sessionManager (): SessionManager {
-    return this._sessionManager;
+  public getSessionManager (): SessionManager {
+    return this.sessionManager;
   }
 
   /**
    * Graceful shutdown - closes all sessions
    */
   public async shutdown (): Promise<void> {
-    this._sessionManager.destroyAllSessions();
-    await this.server.close();
+    this.sessionManager.destroyAllSessions();
+    await this.options.server.close();
   }
 
   /**
    * Registers all HTTP routes with their respective handlers
    */
-  private registerRoutes (): void {
-    this.app.route({
-      method: 'POST',
-      url: this.endpoint,
-      handler: async (req, reply) => {
-        await this.handlers.post.handle(req, reply);
+  private registerMcpRoutes (): void {
+    this.fastify.register((app) => {
+      if (this.options.bearerMiddleware) {
+        addBearerPreHandlerHook(app, this.options.bearerMiddleware);
       }
-    });
 
-    this.app.route({
-      method: 'GET',
-      url: this.endpoint,
-      handler: async (req, reply) => {
-        await this.handlers.get.handle(req, reply);
-      }
-    });
+      app.route({
+        method: 'POST',
+        url: this.endpoint,
+        handler: async (req, reply) => {
+          await this.handlers.post.handle(req, reply);
+        }
+      });
 
-    this.app.route({
-      method: 'DELETE',
-      url: this.endpoint,
-      handler: async (req, reply) => {
-        await this.handlers.delete.handle(req, reply);
-      }
+      app.route({
+        method: 'GET',
+        url: this.endpoint,
+        handler: async (req, reply) => {
+          await this.handlers.get.handle(req, reply);
+        }
+      });
+
+      app.route({
+        method: 'DELETE',
+        url: this.endpoint,
+        handler: async (req, reply) => {
+          await this.handlers.delete.handle(req, reply);
+        }
+      });
     });
+  }
+
+  private get endpoint (): string {
+    return this.options.endpoint || MCP_DEFAULT_ENDPOINT;
   }
 }
