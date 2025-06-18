@@ -1,6 +1,6 @@
 {
   "name": "fastify-mcp-server",
-  "description": "A Fastify plugin for Model Context Protocol (MCP) streamable HTTP support",
+  "description": "Easily spin up Model Context Protocol (MCP) servers using Fastify",
   "version": "0.2.1",
   "type": "module",
   "main": "dist/index.js",
