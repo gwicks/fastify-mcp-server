@@ -14,7 +14,7 @@ const MCP_DEFAULT_ENDPOINT = '/mcp';
 /**
  * Main server class that coordinates MCP streamable HTTP handling
  */
-export class FastifyMcpStreamableHttpServer {
+export class FastifyMcpServer {
   private app: FastifyInstance;
   private server: Server;
   private endpoint: string;

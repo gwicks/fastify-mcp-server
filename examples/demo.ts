@@ -3,7 +3,7 @@ import closeWithGrace from 'close-with-grace';
 import Fastify from 'fastify';
 
 import packageJson from '../package.json' with { type: 'json' };
-import FastifyMcpStreamableHttp, { getMcpDecorator } from '../src/index.ts';
+import FastifyMcpServer, { getMcpDecorator } from '../src/index.ts';
 
 const app = Fastify({
   logger: {
@@ -40,7 +40,7 @@ mcp.tool('get-datetime', 'Get the current date and time', () => ({
   ]
 }));
 
-await app.register(FastifyMcpStreamableHttp, {
+await app.register(FastifyMcpServer, {
   server: mcp.server,
   endpoint: '/mcp' // optional, defaults to '/mcp'
 });
@@ -75,5 +75,5 @@ await app.ready();
 await app.listen({
   host: '127.0.0.1',
   port: 9080,
-  listenTextResolver: (address) => `MCP Streamable HTTP Server listening at ${address}`
+  listenTextResolver: (address) => `MCP Server listening at ${address}`
 });

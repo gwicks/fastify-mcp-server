@@ -2,9 +2,9 @@ import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 
-import { FastifyMcpStreamableHttpServer } from './server.ts';
+import { FastifyMcpServer } from './server.ts';
 
-export type FastifyMcpStreamableHttpOptions = {
+export type FastifyMcpServerOptions = {
   server: Server;
   endpoint?: string;
 };
@@ -14,23 +14,23 @@ const kFastifyMcp = Symbol('fastifyMcp');
 /**
  * Fastify plugin for handling Model Context Protocol (MCP) streamable HTTP requests.
  */
-const FastifyMcpStreamableHttp: FastifyPluginAsync<FastifyMcpStreamableHttpOptions> = async (
+const FastifyMcp: FastifyPluginAsync<FastifyMcpServerOptions> = async (
   app,
   options
 ) => {
   const { server, endpoint } = options;
 
-  const mcp = new FastifyMcpStreamableHttpServer(app, server, endpoint);
+  const mcp = new FastifyMcpServer(app, server, endpoint);
 
   // Decorate the Fastify instance with the MCP server for external access
   app.decorate(kFastifyMcp, mcp);
 };
 
 export function getMcpDecorator (app: FastifyInstance) {
-  return app.getDecorator<FastifyMcpStreamableHttpServer>(kFastifyMcp);
+  return app.getDecorator<FastifyMcpServer>(kFastifyMcp);
 }
 
-export default fp(FastifyMcpStreamableHttp, {
-  name: 'fastify-mcp-streamable-http',
+export default fp(FastifyMcp, {
+  name: 'fastify-mcp-server',
   fastify: '5.x'
 });
