@@ -389,7 +389,7 @@ Contributions are welcome! Please read our contributing guidelines and ensure:
 
 ## License
 
-MIT © [Flavio Del Grosso](https://github.com/flaviodelgrosso)
+ISC © [Flavio Del Grosso](https://github.com/flaviodelgrosso)
 
 ## Related Projects
 
