@@ -273,8 +273,6 @@ import type { BearerAuthMiddlewareOptions } from '@modelcontextprotocol/sdk/serv
 ```
 
 ```typescript
-import { addBearerPreHandlerHook } from 'fastify-mcp-server';
-
 await app.register(FastifyMcpServer, {
   server: mcp.server,
   bearerMiddleware: {
