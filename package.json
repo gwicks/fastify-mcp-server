@@ -41,7 +41,8 @@
     "release": "standard-version",
     "patch": "npm run release -- --release-as patch",
     "minor": "npm run release -- --release-as minor",
-    "major": "npm run release -- --release-as major"
+    "major": "npm run release -- --release-as major",
+    "clean": "rimraf node_modules dist coverage"
   },
   "peerDependencies": {
     "@modelcontextprotocol/sdk": "^1.x",
