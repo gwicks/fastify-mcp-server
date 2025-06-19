@@ -26,7 +26,7 @@ export default [
         }
       ],
       '@stylistic/semi': ['warn', 'always'],
-      '@stylistic/multiline-comment-style': 'warn',
+      '@stylistic/multiline-comment-style': ['warn', 'separate-lines'],
       '@stylistic/function-call-argument-newline': 'off',
       '@stylistic/lines-around-comment': 'off',
       '@stylistic/comma-dangle': [
@@ -65,7 +65,6 @@ export default [
           }
         }
       ]
-
     }
   }
 ];
