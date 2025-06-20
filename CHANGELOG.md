@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/flaviodelgrosso/fastify-mcp-server/compare/v0.3.0...v0.4.0) (2025-06-20)
+
+
+### Features
+
+* add support for Well-Known OAuth Metadata routes ([021d566](https://github.com/flaviodelgrosso/fastify-mcp-server/commit/021d5660101b5ab12f0908b2ab8ae35cb3628fe5))
+
 ## [0.3.0](https://github.com/flaviodelgrosso/fastify-mcp-server/compare/v0.2.1...v0.3.0) (2025-06-20)
 
 
