@@ -20,10 +20,17 @@ const fastifyMcpPlugin: FastifyPluginAsync<FastifyMcpServerOptions> = async (app
     server: mcp.server,
     endpoint: '/mcp', // optional, defaults to '/mcp'
     bearerMiddlewareOptions: {
-      verifier: new BearerTokenVerifier(),
-      onVerifyError: (error) => {
-        app.log.error({ error }, 'Bearer token verification failed');
-      }
+      verifier: new BearerTokenVerifier()
+    },
+    authorizationServerOAuthMetadata: {
+      issuer: 'https://demo.fastify-mcp-server.org',
+      authorization_endpoint: 'https://demo.fastify-mcp-server.org/authorize',
+      token_endpoint: 'https://demo.fastify-mcp-server.org/token',
+      registration_endpoint: 'https://demo.fastify-mcp-server.org/register',
+      response_types_supported: ['code']
+    },
+    protectedResourceOAuthMetadata: {
+      resource: 'https://demo.fastify-mcp-server.org/.well-known/oauth-protected-resource'
     }
   });
 

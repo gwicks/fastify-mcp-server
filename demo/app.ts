@@ -12,11 +12,6 @@ export async function buildApp (options?: FastifyServerOptions) {
     dirNameRoutePrefix: false
   });
 
-  // Auto-load routes
-  server.register(AutoLoad, {
-    dir: path.join(import.meta.dirname, 'routes')
-  });
-
   // Set error handler
   server.setErrorHandler((err, request, reply) => {
     server.log.error(

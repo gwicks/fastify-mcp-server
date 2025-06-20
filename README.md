@@ -36,12 +36,13 @@ A robust Fastify plugin that provides seamless integration with the Model Contex
     - [How It Works](#how-it-works)
       - [Example Tool with authentication information](#example-tool-with-authentication-information)
       - [Example Error Response](#example-error-response)
+  - [Well-Known OAuth Metadata Routes](#well-known-oauth-metadata-routes)
+    - [Registering Well-Known Routes](#registering-well-known-routes)
+    - [Endpoints](#endpoints)
   - [Development](#development)
     - [Setup](#setup)
     - [Scripts](#scripts)
     - [Testing](#testing)
-  - [Troubleshooting](#troubleshooting)
-    - [Common Issues](#common-issues)
   - [Contributing](#contributing)
   - [License](#license)
   - [Related Projects](#related-projects)
@@ -137,8 +138,9 @@ type FastifyMcpServerOptions = {
     verifier: OAuthTokenVerifier; // Custom verifier for Bearer tokens
     requiredScopes?: string[]; // Optional scopes required for access
     resourceMetadataUrl?: string; // Optional URL for resource metadata
-    onVerifyError?: (error: unknown) => void | Promise<void>; // Optional error handler for verification failures
   };
+  authorizationServerOAuthMetadata?: OAuthMetadata; // OAuth metadata for authorization server
+  protectedResourceOAuthMetadata?: OAuthProtectedResourceMetadata; // OAuth metadata for protected resource
 }
 ```
 
@@ -280,10 +282,6 @@ await app.register(FastifyMcpServer, {
     verifier: myVerifier, // implements verifyAccessToken(token)
     requiredScopes: ['mcp:read', 'mcp:write'], // optional
     resourceMetadataUrl: 'https://example.com/.well-known/oauth-resource', // optional,
-    onVerifyError: (error) => {
-      // Optional custom error handling, it can be async
-      app.log.error({ error }, 'Token verification failed');
-    }
   }
 });
 ```
@@ -332,6 +330,49 @@ Content-Type: application/json
 {"error":"invalid_token","error_description":"Token has expired"}
 ```
 
+## Well-Known OAuth Metadata Routes
+
+The plugin can automatically register standard OAuth 2.0 metadata endpoints under the `.well-known` path, which are useful for interoperability with OAuth clients and resource servers. You can test metadata discovery with the MCP inspector in the `Authentication` tab.
+
+### Registering Well-Known Routes
+
+To enable these endpoints, provide the `authorizationServerOAuthMetadata` and/or `protectedResourceOAuthMetadata` options when registering the plugin:
+
+```typescript
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import FastifyMcpServer from 'fastify-mcp-server';
+
+const mcp = new McpServer({
+  name: 'my-mcp-server',
+  version: '1.0.0',
+});
+
+const authorizationServerMetadata = {
+  issuer: 'https://your-domain.com',
+  authorization_endpoint: 'https://your-domain.com/oauth/authorize',
+  token_endpoint: 'https://your-domain.com/oauth/token',
+  // ...other OAuth metadata fields
+};
+
+const protectedResourceMetadata = {
+  resource: 'https://your-domain.com/.well-known/oauth-protected-resource',
+  // ...other resource metadata fields
+};
+
+await app.register(FastifyMcpServer, {
+  server: mcp.server,
+  authorizationServerOAuthMetadata: authorizationServerMetadata, // Registers /.well-known/oauth-authorization-server
+  protectedResourceOAuthMetadata: protectedResourceMetadata,     // Registers /.well-known/oauth-protected-resource
+});
+```
+
+### Endpoints
+
+- `GET /.well-known/oauth-authorization-server` — Returns the OAuth authorization server metadata.
+- `GET /.well-known/oauth-protected-resource` — Returns the OAuth protected resource metadata.
+
+These endpoints are registered only if the corresponding metadata options are provided.
+
 ## Development
 
 ### Setup
@@ -364,23 +405,6 @@ The project maintains 100% test coverage. Run tests with:
 npm test
 ```
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Session Not Found Errors**
-   - Ensure session IDs are properly maintained across requests
-   - Check that sessions aren't timing out unexpectedly
-
-2. **Transport Errors**
-   - Verify proper MCP request format
-   - Check network connectivity and timeouts
-
-3. **Performance Issues**
-   - Monitor active session count
-   - Implement session cleanup strategies
-   - Consider connection pooling for high-traffic scenarios
-
 ## Contributing
 
 Contributions are welcome! Please read our contributing guidelines and ensure:
@@ -399,7 +423,3 @@ ISC © [Flavio Del Grosso](https://github.com/flaviodelgrosso)
 - [Model Context Protocol](https://github.com/modelcontextprotocol/servers) - Official MCP specification and servers
 - [Fastify](https://github.com/fastify/fastify) - Fast and low overhead web framework
 - [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk) - TypeScript SDK for MCP
-
----
-
-**Need help?** [Open an issue](https://github.com/flaviodelgrosso/fastify-mcp-server/issues) or [start a discussion](https://github.com/flaviodelgrosso/fastify-mcp-server/discussions).

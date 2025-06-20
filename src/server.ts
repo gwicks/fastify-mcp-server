@@ -10,6 +10,7 @@ import {
 } from './handlers.ts';
 import type { FastifyMcpServerOptions } from './index.ts';
 import { SessionManager } from './session-manager.ts';
+import { registerOAuthAuthorizationServerRoute, registerOAuthProtectedResourceRoute } from './well-known.ts';
 
 const MCP_DEFAULT_ENDPOINT = '/mcp';
 
@@ -35,6 +36,14 @@ export class FastifyMcpServer {
       get: new GetRequestHandler(this.sessionManager),
       delete: new DeleteRequestHandler(this.sessionManager)
     };
+
+    if (options.authorizationServerOAuthMetadata) {
+      registerOAuthAuthorizationServerRoute(app, options.authorizationServerOAuthMetadata);
+    }
+
+    if (options.protectedResourceOAuthMetadata) {
+      registerOAuthProtectedResourceRoute(app, options.protectedResourceOAuthMetadata);
+    }
 
     this.registerMcpRoutes();
   }
