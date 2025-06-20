@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/flaviodelgrosso/fastify-mcp-server/compare/v0.2.1...v0.3.0) (2025-06-20)
+
+
+### Features
+
+* enhance bearer token middleware with error handling options ([e22e99c](https://github.com/flaviodelgrosso/fastify-mcp-server/commit/e22e99cad4cbb57c1924edf755323a028496d99e))
+
 ### [0.2.1](https://github.com/flaviodelgrosso/fastify-mcp-server/compare/v0.2.0...v0.2.1) (2025-06-18)
 
 
