@@ -133,10 +133,11 @@ await app.listen({ host: '127.0.0.1', port: 3000 });
 type FastifyMcpServerOptions = {
   server: Server;      // MCP Server instance from @modelcontextprotocol/sdk
   endpoint?: string;   // Custom endpoint path (default: '/mcp')
-  bearerMiddleware?: {
+  bearerMiddlewareOptions?: {
     verifier: OAuthTokenVerifier; // Custom verifier for Bearer tokens
     requiredScopes?: string[]; // Optional scopes required for access
     resourceMetadataUrl?: string; // Optional URL for resource metadata
+    onVerifyError?: (error: unknown) => void | Promise<void>; // Optional error handler for verification failures
   };
 }
 ```
@@ -262,11 +263,11 @@ closeWithGrace({ delay: 500 }, async ({ signal, err }) => {
 
 ## Authentication: Bearer Token Support
 
-You can secure your MCP endpoints using Bearer token authentication. The plugin provides a `bearerMiddleware` option, which enables validation of Bearer tokens in the `Authorization` header for all MCP requests.
+You can secure your MCP endpoints using Bearer token authentication. The plugin provides a `bearerMiddlewareOptions` option, which enables validation of Bearer tokens in the `Authorization` header for all MCP requests.
 
 ### Enabling Bearer Token Authentication
 
-Pass the `bearerMiddleware` option when registering the plugin. It accepts `BearerAuthMiddlewareOptions` from the SDK:
+Pass the `bearerMiddlewareOptions` option when registering the plugin. It accepts `BearerAuthMiddlewareOptions` from the SDK:
 
 ```typescript
 import type { BearerAuthMiddlewareOptions } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
@@ -275,10 +276,14 @@ import type { BearerAuthMiddlewareOptions } from '@modelcontextprotocol/sdk/serv
 ```typescript
 await app.register(FastifyMcpServer, {
   server: mcp.server,
-  bearerMiddleware: {
+  bearerMiddlewareOptions: {
     verifier: myVerifier, // implements verifyAccessToken(token)
     requiredScopes: ['mcp:read', 'mcp:write'], // optional
-    resourceMetadataUrl: 'https://example.com/.well-known/oauth-resource', // optional
+    resourceMetadataUrl: 'https://example.com/.well-known/oauth-resource', // optional,
+    onVerifyError: (error) => {
+      // Optional custom error handling, it can be async
+      app.log.error({ error }, 'Token verification failed');
+    }
   }
 });
 ```

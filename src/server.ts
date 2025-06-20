@@ -69,8 +69,8 @@ export class FastifyMcpServer {
    */
   private registerMcpRoutes (): void {
     this.fastify.register((app) => {
-      if (this.options.bearerMiddleware) {
-        addBearerPreHandlerHook(app, this.options.bearerMiddleware);
+      if (this.options.bearerMiddlewareOptions) {
+        addBearerPreHandlerHook(app, this.options.bearerMiddlewareOptions);
       }
 
       setMcpErrorHandler(app);

@@ -24,7 +24,7 @@ describe('Bearer Token', async () => {
 
   test('should accept a request with a valid Bearer token', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier
       }
     });
@@ -57,7 +57,7 @@ describe('Bearer Token', async () => {
 
   test('should reject a request without a Bearer token', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier
       }
     });
@@ -86,7 +86,7 @@ describe('Bearer Token', async () => {
 
   test('should reject a request with a malformed Bearer token', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier
       }
     });
@@ -116,7 +116,7 @@ describe('Bearer Token', async () => {
 
   test('should reject a request with an expired Bearer token', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier
       }
     });
@@ -149,7 +149,7 @@ describe('Bearer Token', async () => {
 
   test('should reject a request with a Bearer token that has insufficient scope', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier,
         requiredScopes: ['mcp:required-scope']
       }
@@ -183,7 +183,7 @@ describe('Bearer Token', async () => {
 
   test('should reject with ServerError', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier
       }
     });
@@ -216,7 +216,7 @@ describe('Bearer Token', async () => {
 
   test('should reject with OAuthError', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier
       }
     });
@@ -249,7 +249,7 @@ describe('Bearer Token', async () => {
 
   test('should handle unexpected error', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier
       }
     });
@@ -282,7 +282,7 @@ describe('Bearer Token', async () => {
 
   test('should add WWW-Authenticate header with resource metadata URL', async () => {
     const app = await buildApp({
-      bearerMiddleware: {
+      bearerMiddlewareOptions: {
         verifier: mockVerifier,
         resourceMetadataUrl: 'https://example.com/resource-metadata'
       }
@@ -306,5 +306,35 @@ describe('Bearer Token', async () => {
 
     strictEqual(response.statusCode, 401);
     strictEqual(response.headers['www-authenticate'], 'Bearer error="invalid_token", error_description="Invalid Authorization header format, expected \'Bearer TOKEN\'", resource_metadata="https://example.com/resource-metadata"');
+  });
+
+  test('should execute onVerifyError callback on verification failure', async () => {
+    const onVerifyError = mock.fn();
+
+    const app = await buildApp({
+      bearerMiddlewareOptions: {
+        verifier: mockVerifier,
+        onVerifyError
+      }
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/mcp',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+        authorization: 'Invalid TOKEN'
+      },
+      body: {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'ping',
+        params: {}
+      }
+    });
+
+    strictEqual(response.statusCode, 401);
+    strictEqual(onVerifyError.mock.callCount(), 1);
   });
 });

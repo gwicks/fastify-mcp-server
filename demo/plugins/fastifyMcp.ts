@@ -19,8 +19,11 @@ const fastifyMcpPlugin: FastifyPluginAsync<FastifyMcpServerOptions> = async (app
   await app.register(FastifyMcpStreamableHttp, {
     server: mcp.server,
     endpoint: '/mcp', // optional, defaults to '/mcp'
-    bearerMiddleware: {
-      verifier: new BearerTokenVerifier()
+    bearerMiddlewareOptions: {
+      verifier: new BearerTokenVerifier(),
+      onVerifyError: (error) => {
+        app.log.error({ error }, 'Bearer token verification failed');
+      }
     }
   });
 

@@ -1,14 +1,14 @@
-import type { BearerAuthMiddlewareOptions } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 
+import type { BearerPreHandlerHookOptions } from './bearer.ts';
 import { FastifyMcpServer } from './server.ts';
 
 export type FastifyMcpServerOptions = {
   server: Server;
   endpoint?: string;
-  bearerMiddleware?: BearerAuthMiddlewareOptions;
+  bearerMiddlewareOptions?: BearerPreHandlerHookOptions;
 };
 
 const kFastifyMcp = Symbol('fastifyMcp');

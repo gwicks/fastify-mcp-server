@@ -3,20 +3,25 @@ import type { BearerAuthMiddlewareOptions } from '@modelcontextprotocol/sdk/serv
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
+export interface BearerPreHandlerHookOptions extends BearerAuthMiddlewareOptions {
+  onVerifyError?: (error: unknown) => void | Promise<void>;
+}
+
 /**
  * Middleware that requires a valid Bearer token in the Authorization header.
  * This will validate the token with the auth provider and add the resulting auth info to the request object.
  * If resourceMetadataUrl is provided, it will be included in the WWW-Authenticate header for 401 responses as per the OAuth 2.0 Protected Resource Metadata spec.
  */
-export function addBearerPreHandlerHook (app: FastifyInstance, options: BearerAuthMiddlewareOptions) {
-  const { verifier, requiredScopes = [], resourceMetadataUrl } = options;
+export function addBearerPreHandlerHook (app: FastifyInstance, options: BearerPreHandlerHookOptions) {
+  const { verifier, requiredScopes = [], resourceMetadataUrl, onVerifyError } = options;
 
   app.addHook('preHandler', async (req, reply) => {
     try {
       const authInfo = await getAuthInfo(req, verifier, requiredScopes);
       Object.assign(req.raw, { auth: authInfo }); // Ensure raw request also has auth info
     } catch (error) {
-      handleAuthError(error, reply, resourceMetadataUrl);
+      await onVerifyError?.(error);
+      sendAuthError(error, reply, resourceMetadataUrl);
     }
   });
 }
@@ -94,7 +99,7 @@ function buildWwwAuthenticateHeader (
 /**
  * Handles authentication errors and sends appropriate responses
  */
-function handleAuthError (
+function sendAuthError (
   error: unknown,
   reply: FastifyReply,
   resourceMetadataUrl?: string
