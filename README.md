@@ -36,6 +36,7 @@ A robust Fastify plugin that provides seamless integration with the Model Contex
     - [How It Works](#how-it-works)
       - [Example Tool with authentication information](#example-tool-with-authentication-information)
       - [Example Error Response](#example-error-response)
+      - [Example using PAT in Visual Studio Code](#example-using-pat-in-visual-studio-code)
   - [Well-Known OAuth Metadata Routes](#well-known-oauth-metadata-routes)
     - [Registering Well-Known Routes](#registering-well-known-routes)
     - [Endpoints](#endpoints)
@@ -328,6 +329,29 @@ WWW-Authenticate: Bearer error="invalid_token", error_description="Token has exp
 Content-Type: application/json
 
 {"error":"invalid_token","error_description":"Token has expired"}
+```
+
+#### Example using PAT in Visual Studio Code
+
+```json
+{
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "bearer_token",
+            "description": "Enter your MCP Bearer Token",
+            "password": true
+        }
+    ],
+    "servers": {
+        "my-mcp-server": {
+            "url": "http://localhost:9080/mcp",
+            "headers": {
+                "Authorization": "Bearer ${input:bearer_token}"
+            }
+        }
+    }
+}
 ```
 
 ## Well-Known OAuth Metadata Routes
