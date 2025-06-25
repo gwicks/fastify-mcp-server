@@ -29,12 +29,12 @@
     "url": "git+https://github.com/flaviodelgrosso/fastify-mcp-server.git"
   },
   "scripts": {
-    "dev": "node --no-warnings --watch demo/server.ts",
+    "dev": "node --watch demo/server.ts",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
     "prepare": "husky",
-    "test": "c8 --100 node --no-warnings --test test/**/*.test.ts",
-    "test:lcov": "c8 --100 --reporter=lcov node --no-warnings --test test/**/*.test.ts",
+    "test": "c8 --100 node --test test/**/*.test.ts",
+    "test:lcov": "c8 --100 --reporter=lcov node --test test/**/*.test.ts",
     "lint": "eslint",
     "lint:fix": "npm run lint -- --fix",
     "inspector": "npx @modelcontextprotocol/inspector",
